@@ -62,10 +62,10 @@ public class DataBean {
 
     private Long lastUpdate;
 
-    //private int isNew; //数据存在是否是一个新用户（通常不存在）
+    private int isNew; //数据存在是否是一个新用户（通常不存在）
 
     //是不是新用户，如果为1为新用户，如果为0为老用户
-    private int isN;
+    //private int isN;
 
     public DataBean(){}
 
@@ -278,21 +278,21 @@ public class DataBean {
         this.lastUpdate = lastUpdate;
     }
 
-//    public int getIsNew() {
-//        return isNew;
+    public int getIsNew() {
+        return isNew;
+    }
+
+    public void setIsNew(int isNew) {
+        this.isNew = isNew;
+    }
+
+//    public int getIsN() {
+//        return isN;
 //    }
 //
-//    public void setIsNew(int isNew) {
-//        this.isNew = isNew;
+//    public void setIsN(int isN) {
+//        this.isN = isN;
 //    }
-
-    public int getIsN() {
-        return isN;
-    }
-
-    public void setIsN(int isN) {
-        this.isN = isN;
-    }
 
     public String getDate() {
         return date;
@@ -339,7 +339,7 @@ public class DataBean {
                 ", region='" + region + '\'' +
                 ", properties=" + properties +
                 ", lastUpdate=" + lastUpdate +
-                ", isNew=" + isN +
+                ", isNew=" + isNew +
                 '}';
     }
 }
