@@ -8,6 +8,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
+import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,6 +34,40 @@ public class FlinkUtils {
                 clazz.newInstance(),
                 properties
         );
+        //不将偏移量写入到kafka特殊的topic中
+        kafkaConsumer.setCommitOffsetsOnCheckpoints(false);
+
+        return env.addSource(kafkaConsumer);
+
+
+    }
+
+
+    /**
+     * 从Kafka中读取数据，并且生成唯一ID（topic-partition-offset）
+     * @param path
+     * @param clazz
+     * @param <T>
+     * @return
+     * @throws Exception
+     */
+    public static <T> DataStream<T> createKafkaStreamWithId(String path, Class<? extends KafkaDeserializationSchema<T>> clazz) throws Exception {
+        //Flink的工具类，用于参数解析
+        ParameterTool parameterTool = ParameterTool.fromPropertiesFile(path);
+        String topics = parameterTool.get("kafka.input.topics");
+        long ckInterval = parameterTool.getLong("checkpoint.interval", 60000);
+        String ckPath = parameterTool.getRequired("checkpoint.path");
+        env.enableCheckpointing(ckInterval);
+        env.setStateBackend(new FsStateBackend(ckPath));
+        Properties properties = parameterTool.getProperties();
+
+        List<String> topicList = Arrays.asList(topics.split(","));
+        FlinkKafkaConsumer<T> kafkaConsumer = new FlinkKafkaConsumer<>(
+                topicList,
+                clazz.newInstance(),
+                properties
+        );
+
         //不将偏移量写入到kafka特殊的topic中
         kafkaConsumer.setCommitOffsetsOnCheckpoints(false);
 
