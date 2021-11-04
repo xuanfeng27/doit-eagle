@@ -33,7 +33,7 @@ public class AudienceCountFunction extends KeyedProcessFunction<String, DataBean
         if (totalAudienceCount == null) {
             totalAudienceCount = 0;
         }
-        //进入时间
+        //进入事件
         if (Constants.LIVE_ENTER.equals(eventId)) {
             //实时在线人数+1
             onLineAudienceCount += 1;
