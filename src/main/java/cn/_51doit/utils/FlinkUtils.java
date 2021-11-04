@@ -3,6 +3,7 @@ package cn._51doit.utils;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.contrib.streaming.state.EmbeddedRocksDBStateBackend;
 import org.apache.flink.runtime.state.filesystem.FsStateBackend;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -58,7 +59,11 @@ public class FlinkUtils {
         long ckInterval = parameterTool.getLong("checkpoint.interval", 60000);
         String ckPath = parameterTool.getRequired("checkpoint.path");
         env.enableCheckpointing(ckInterval);
-        env.setStateBackend(new FsStateBackend(ckPath));
+        //env.setStateBackend(new FsStateBackend(ckPath));
+        //使用RocksDB作为StateBackend，
+        env.setStateBackend(new EmbeddedRocksDBStateBackend());
+        env.getCheckpointConfig().setCheckpointStorage(ckPath);
+
         Properties properties = parameterTool.getProperties();
 
         List<String> topicList = Arrays.asList(topics.split(","));
