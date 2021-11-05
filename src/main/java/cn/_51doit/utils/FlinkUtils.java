@@ -64,7 +64,12 @@ public class FlinkUtils {
         env.setStateBackend(new EmbeddedRocksDBStateBackend());
         env.getCheckpointConfig().setCheckpointStorage(ckPath);
 
-        Properties properties = parameterTool.getProperties();
+        //Properties properties = parameterTool.getProperties();
+        Properties properties = new Properties();
+        String bootstrapServers = parameterTool.get("bootstrap.servers");
+        String autoOffsetReset = parameterTool.get("auto.offset.reset", "earliest");
+        properties.put("bootstrap.servers", bootstrapServers);
+        properties.put("auto.offset.reset", autoOffsetReset);
 
         List<String> topicList = Arrays.asList(topics.split(","));
         FlinkKafkaConsumer<T> kafkaConsumer = new FlinkKafkaConsumer<>(
