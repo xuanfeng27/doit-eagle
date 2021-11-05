@@ -76,6 +76,7 @@ public class HotGoodTopN {
 
         res.print();
 
+        FlinkUtils.env.execute();
 
     }
 

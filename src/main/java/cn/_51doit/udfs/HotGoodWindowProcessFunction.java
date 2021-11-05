@@ -27,6 +27,6 @@ public class HotGoodWindowProcessFunction extends ProcessWindowFunction<Long, It
         //窗口的结束时间
         long windowEnd = context.window().getEnd();
         //输出数据
-        out.collect(new ItemEventCount(categoryId, productId, eventId, count, windowStart, windowStart));
+        out.collect(new ItemEventCount(categoryId, productId, eventId, count, windowStart, windowEnd));
     }
 }
