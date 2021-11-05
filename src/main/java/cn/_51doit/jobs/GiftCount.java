@@ -6,12 +6,14 @@ import cn._51doit.udfs.JsonToDataBeanFunction;
 import cn._51doit.utils.Constants;
 import cn._51doit.utils.FlinkUtils;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.streaming.api.datastream.*;
 
 /**
@@ -50,9 +52,20 @@ public class GiftCount {
         //KeyedStream<DataBean, String> keyedStream = filtered.keyBy(bean -> bean.getProperties().get("anchor_id").toString());
 
         //事实流connect广播流(共享状态)
-        SingleOutputStreamOperator<Tuple3<String, String, Double>> connectedStream = filtered.connect(broadcastStream).process(new GiftBroadCastProcessFunction(broadcastStateDesc));
+        SingleOutputStreamOperator<Tuple4<String, String, Integer, Double>> connectedStream = filtered.connect(broadcastStream).process(new GiftBroadCastProcessFunction(broadcastStateDesc));
 
-        connectedStream.print();
+        SingleOutputStreamOperator<Tuple4<String, String, Integer, Double>> res = connectedStream.keyBy(tp -> tp.f0).reduce(new ReduceFunction<Tuple4<String, String, Integer, Double>>() {
+            @Override
+            public Tuple4<String, String, Integer, Double> reduce(Tuple4<String, String, Integer, Double> value1, Tuple4<String, String, Integer, Double> value2) throws Exception {
+                //累计礼物数量
+                value1.f2 += value2.f2;
+                //累计礼物积分
+                value1.f3 += value2.f3;
+                return value1;
+            }
+        });
+
+        res.print();
 
         FlinkUtils.env.execute();
 
