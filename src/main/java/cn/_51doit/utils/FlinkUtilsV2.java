@@ -18,6 +18,8 @@ public class FlinkUtilsV2 {
 
     public static final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
+    public static ParameterTool parameterTool;
+
     public static <T> DataStream<T> createKafkaStream(String path, Class<? extends DeserializationSchema<T>> clazz) throws Exception {
         ParameterTool parameterTool = ParameterTool.fromPropertiesFile(path);
         String topics = parameterTool.get("kafka.input.topics");
@@ -60,7 +62,7 @@ public class FlinkUtilsV2 {
 
     public static <T> DataStream<T> createKafkaStreamWithId(String path, Class<? extends KafkaDeserializationSchema<T>> clazz) throws Exception {
 
-        ParameterTool parameterTool = ParameterTool.fromPropertiesFile(path);
+        parameterTool = ParameterTool.fromPropertiesFile(path);
 
         String bootstrapServers = parameterTool.getRequired("bootstrap.servers");
 
@@ -74,7 +76,7 @@ public class FlinkUtilsV2 {
         properties.setProperty("bootstrap.servers", parameterTool.getRequired("bootstrap.servers"));
         properties.setProperty("auto.offset.reset", parameterTool.get("auto.offset.reset", "earliest"));
 
-        String topics = parameterTool.getRequired("input.topics");
+        String topics = parameterTool.getRequired("kafka.input.topics");
         List<String> topicList = Arrays.asList(topics.split(","));
 
         FlinkKafkaConsumer<T> kafkaConsumer = new FlinkKafkaConsumer<>(
